@@ -29,10 +29,20 @@ const PropertiesPanel = ({ selectedFeature, options, onOptionsChange, image }) =
   };
 
   return (
-    <div className="w-72 bg-[#2b2b2b] border-l border-[#3a3a3a] overflow-y-auto">
-      <div className="p-5">
+    <div className="
+      fixed bottom-0 left-0 right-0 
+      md:relative md:w-72 
+      bg-[#2b2b2b] 
+      border-t md:border-t-0 md:border-l border-[#3a3a3a] 
+      overflow-y-auto
+      max-h-[50vh] md:max-h-none
+      z-20
+      rounded-t-2xl md:rounded-none
+      shadow-2xl md:shadow-none
+    ">
+      <div className="p-4 sm:p-5">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <h2 className="text-sm font-semibold text-[#e8e8e8] mb-1">
             {featureTitles[selectedFeature]}
           </h2>
@@ -89,7 +99,7 @@ const PropertiesPanel = ({ selectedFeature, options, onOptionsChange, image }) =
                   />
                 </div>
               </div>
-              
+
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <div className="relative">
                   <input
@@ -119,7 +129,7 @@ const PropertiesPanel = ({ selectedFeature, options, onOptionsChange, image }) =
                   {options.quality || 80}%
                 </span>
               </div>
-              
+
               <input
                 type="range"
                 name="quality"
@@ -129,7 +139,7 @@ const PropertiesPanel = ({ selectedFeature, options, onOptionsChange, image }) =
                 onChange={handleChange}
                 className="w-full h-1.5 bg-[#3a3a3a] rounded-full appearance-none cursor-pointer slider"
               />
-              
+
               <div className="flex justify-between text-[10px] text-[#6a6a6a] mt-1.5">
                 <span>Low</span>
                 <span>High</span>
@@ -172,7 +182,7 @@ const PropertiesPanel = ({ selectedFeature, options, onOptionsChange, image }) =
                   {options.threshold || 240}
                 </span>
               </div>
-              
+
               <input
                 type="range"
                 name="threshold"
@@ -182,7 +192,7 @@ const PropertiesPanel = ({ selectedFeature, options, onOptionsChange, image }) =
                 onChange={handleChange}
                 className="w-full h-1.5 bg-[#3a3a3a] rounded-full appearance-none cursor-pointer slider"
               />
-              
+
               <div className="flex justify-between text-[10px] text-[#6a6a6a] mt-1.5">
                 <span>Less</span>
                 <span>More</span>

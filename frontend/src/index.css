@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Custom breakpoint for extra small screens */
+@media (min-width: 475px) {
+  .xs\:inline {
+    display: inline;
+  }
+}
+
+/* Touch optimization */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -47,6 +60,8 @@ input[type="range"].slider::-webkit-slider-thumb:hover {
 }
 
 input[type="range"].slider::-moz-range-thumb {
+  appearance: none;
+  -moz-appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -81,6 +96,8 @@ input[type="number"] {
 }
 
 /* Smooth transitions */
-button, input, select {
+button,
+input,
+select {
   transition: all 0.15s ease;
 }

@@ -30,7 +30,9 @@ function App() {
     formData.append('options', JSON.stringify(options));
 
     try {
-      const response = await fetch('http://localhost:5000/api/process', {
+      // Use relative path for production (Vercel), or localhost for local dev
+      const apiUrl = import.meta.env.PROD ? '/api/process' : 'http://localhost:5000/api/process';
+      const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
       });

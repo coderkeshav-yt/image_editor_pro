@@ -1,5 +1,24 @@
 import React from 'react';
 
+// Helper function to format file size
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+};
+
+// Helper function to estimate compressed size based on quality
+const estimateCompressedSize = (originalSize, quality) => {
+    // More accurate estimation based on typical JPEG compression behavior
+    // Lower quality = exponentially smaller file size
+    // Quality 100 ≈ 50-60% of original, Quality 80 ≈ 30-40%, Quality 50 ≈ 15-25%
+    const qualityFactor = quality / 100;
+    const compressionRatio = 0.15 + (qualityFactor * qualityFactor * 0.45); // Exponential curve
+    return Math.round(originalSize * compressionRatio);
+};
+
 const ControlPanel = ({ selectedFeature, options, onOptionsChange, onProcess }) => {
     if (!selectedFeature) return null;
 
@@ -90,6 +109,20 @@ const ControlPanel = ({ selectedFeature, options, onOptionsChange, onProcess }) 
                             onChange={handleChange}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                         />
+                        {options.imageFile && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-md text-sm">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-gray-600">Original Size:</span>
+                                    <span className="font-medium">{formatFileSize(options.imageFile.size)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Estimated Size:</span>
+                                    <span className="font-medium text-blue-600">
+                                        {formatFileSize(estimateCompressedSize(options.imageFile.size, options.quality || 80))}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

@@ -17,7 +17,8 @@ function App() {
 
   const handleFeatureSelect = (featureId) => {
     setSelectedFeature(featureId);
-    setOptions({}); // Reset options when feature changes
+    // Include image file in options for size calculation
+    setOptions({ imageFile: image });
   };
 
   const handleProcess = async () => {

@@ -2,11 +2,13 @@ const sharp = require('sharp');
 
 const processImage = async (buffer, feature, options, originalMimeType) => {
     let pipeline = sharp(buffer);
+    let outputFormat = 'jpeg'; // Default format
 
     switch (feature) {
         case 'convert':
             const format = options.format || 'jpeg';
             pipeline = pipeline.toFormat(format);
+            outputFormat = format;
             break;
 
         case 'resize':
@@ -21,30 +23,65 @@ const processImage = async (buffer, feature, options, originalMimeType) => {
 
         case 'compress':
             const quality = options.quality ? parseInt(options.quality) : 80;
-            // Detect format or default to jpeg for compression
-            // Ideally we should keep original format if possible, or convert to jpeg/webp
-            // For simplicity, let's default to jpeg if not specified, or use the input format if supported
             pipeline = pipeline.jpeg({ quality });
             break;
 
         case 'remove-bg':
-            // Basic mock or simple edge detection if possible.
-            // Sharp doesn't do AI background removal. 
-            // We can try to make it transparent if it's a simple task, but usually this needs an external API.
-            // For now, we will just return the original image or maybe grayscale it to show "processing"
-            // or use a simple threshold if requested.
-            // User asked for "simple implementation" or "simulate".
-            // Let's simulate by just returning it (or maybe adding a watermark/overlay to show it was "processed").
-            // Real BG removal needs generic-js or similar, which is heavy.
-            // We'll just pass through for now with a comment.
-            console.log('Background removal requested - Mock implementation');
-            break;
+            try {
+                // Simple background removal using color threshold
+                const threshold = parseInt(options.threshold) || 240;
+                
+                console.log('Remove BG - Threshold:', threshold);
+                console.log('Input buffer size:', buffer.length);
+                
+                // Process image to remove background
+                const { data, info } = await sharp(buffer)
+                    .ensureAlpha()
+                    .raw()
+                    .toBuffer({ resolveWithObject: true });
+                
+                console.log('Image info:', info);
+                
+                // Process each pixel
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    // Calculate brightness
+                    const brightness = (r + g + b) / 3;
+                    
+                    // If pixel is bright (close to white), make it transparent
+                    if (brightness > threshold) {
+                        data[i + 3] = 0; // Set alpha to 0 (transparent)
+                    }
+                }
+                
+                console.log('Pixels processed, creating output...');
+                
+                // Create new image from processed data
+                const resultBuffer = await sharp(data, {
+                    raw: {
+                        width: info.width,
+                        height: info.height,
+                        channels: 4
+                    }
+                }).png().toBuffer();
+                
+                console.log('Output buffer size:', resultBuffer.length);
+                
+                return { buffer: resultBuffer, format: 'png' };
+            } catch (error) {
+                console.error('Remove BG error:', error);
+                throw error;
+            }
 
         default:
             break;
     }
 
-    return await pipeline.toBuffer();
+    const resultBuffer = await pipeline.toBuffer();
+    return { buffer: resultBuffer, format: outputFormat };
 };
 
 module.exports = { processImage };

@@ -30,7 +30,11 @@ app.post('/api/process', upload.single('image'), async (req, res) => {
         const { feature, options } = req.body;
         const parsedOptions = options ? JSON.parse(options) : {};
 
-        const processedImageBuffer = await processImage(req.file.buffer, feature, parsedOptions, req.file.mimetype);
+        const result = await processImage(req.file.buffer, feature, parsedOptions, req.file.mimetype);
+        
+        // Handle both old format (buffer) and new format (object with buffer and format)
+        const processedImageBuffer = result.buffer || result;
+        const outputFormat = result.format || 'jpeg';
 
         // Upload to Cloudinary (as requested)
         try {
@@ -41,12 +45,20 @@ app.post('/api/process', upload.single('image'), async (req, res) => {
             // Continue to send the file even if storage fails
         }
 
-        res.set('Content-Type', 'image/jpeg');
+        // Set correct content type based on format
+        const mimeTypes = {
+            'jpeg': 'image/jpeg',
+            'jpg': 'image/jpeg',
+            'png': 'image/png',
+            'webp': 'image/webp'
+        };
+        
+        res.set('Content-Type', mimeTypes[outputFormat] || 'image/jpeg');
         res.send(processedImageBuffer);
 
     } catch (error) {
         console.error('Error processing image:', error);
-        res.status(500).json({ error: 'Failed to process image' });
+        res.status(500).json({ error: 'Failed to process image', details: error.message });
     }
 });
 

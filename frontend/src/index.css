@@ -1,1 +1,86 @@
 @import "tailwindcss";
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}
+
+/* Range Slider */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  background: #3a3a3a;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0066ff;
+  cursor: pointer;
+  border: 2px solid #2b2b2b;
+  transition: all 0.15s ease;
+}
+
+input[type="range"].slider::-webkit-slider-thumb:hover {
+  background: #0052cc;
+  transform: scale(1.1);
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0066ff;
+  cursor: pointer;
+  border: 2px solid #2b2b2b;
+  transition: all 0.15s ease;
+}
+
+input[type="range"].slider::-moz-range-thumb:hover {
+  background: #0052cc;
+  transform: scale(1.1);
+}
+
+/* Select dropdown styling */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239a9a9a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+/* Input number arrows removal */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Smooth transitions */
+button, input, select {
+  transition: all 0.15s ease;
+}

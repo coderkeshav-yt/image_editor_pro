@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import ImageUpload from './components/ImageUpload';
-import FeatureSelector from './components/FeatureSelector';
-import ControlPanel from './components/ControlPanel';
+import { useState } from 'react';
+import Toolbar from './components/Toolbar';
+import Canvas from './components/Canvas';
+import PropertiesPanel from './components/PropertiesPanel';
 
 function App() {
   const [image, setImage] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [options, setOptions] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [zoom, setZoom] = useState(100);
 
   const handleImageUpload = (file) => {
     setImage(file);
@@ -17,7 +18,6 @@ function App() {
 
   const handleFeatureSelect = (featureId) => {
     setSelectedFeature(featureId);
-    // Include image file in options for size calculation
     setOptions({ imageFile: image });
   };
 
@@ -28,28 +28,36 @@ function App() {
     const formData = new FormData();
     formData.append('image', image);
     formData.append('feature', selectedFeature);
-    formData.append('options', JSON.stringify(options));
+    
+    // Remove imageFile from options before sending (it's not needed on backend)
+    const { imageFile, ...backendOptions } = options;
+    formData.append('options', JSON.stringify(backendOptions));
+    
+    console.log('Processing:', selectedFeature, 'with options:', backendOptions);
 
     try {
-      // Use relative path for production (Vercel), or localhost for local dev
       const apiUrl = import.meta.env.PROD ? '/api/process' : 'http://localhost:5000/api/process';
       const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Processing failed');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server error:', errorText);
+        throw new Error('Processing failed');
+      }
 
-      // Handle file download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
 
-      // Determine extension based on options or original file
       let extension = 'jpg';
       if (selectedFeature === 'convert' && options.format) {
         extension = options.format;
+      } else if (selectedFeature === 'remove-bg') {
+        extension = 'png'; // Remove BG always outputs PNG
       } else if (image.type === 'image/png') {
         extension = 'png';
       } else if (image.type === 'image/webp') {
@@ -71,65 +79,33 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-gray-900">
-      <div className="max-w-3xl mx-auto">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-2">
-            Image Pro Editor
-          </h1>
-          <p className="text-lg text-gray-600">
-            Quick, professional image transformations.
-          </p>
-        </header>
+    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white overflow-hidden">
+      <Toolbar 
+        image={image}
+        zoom={zoom}
+        setZoom={setZoom}
+        onProcess={handleProcess}
+        isProcessing={isProcessing}
+        selectedFeature={selectedFeature}
+      />
 
-        <main>
-          {!image ? (
-            <ImageUpload onImageUpload={handleImageUpload} />
-          ) : (
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">Editor</h2>
-                  <button
-                    onClick={() => setImage(null)}
-                    className="text-sm text-gray-500 hover:text-red-500 transition-colors"
-                  >
-                    Remove Image
-                  </button>
-                </div>
+      <div className="flex flex-1 overflow-hidden">
+        <Canvas 
+          image={image}
+          onImageUpload={handleImageUpload}
+          zoom={zoom}
+          selectedFeature={selectedFeature}
+          onSelectFeature={handleFeatureSelect}
+        />
 
-                <div className="flex justify-center mb-8 bg-gray-100 rounded-lg p-4">
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt="Preview"
-                    className="max-h-64 object-contain rounded shadow-sm"
-                  />
-                </div>
-
-                <FeatureSelector
-                  selectedFeature={selectedFeature}
-                  onSelectFeature={handleFeatureSelect}
-                />
-
-                {selectedFeature && (
-                  <ControlPanel
-                    selectedFeature={selectedFeature}
-                    options={options}
-                    onOptionsChange={setOptions}
-                    onProcess={handleProcess}
-                  />
-                )}
-
-                {isProcessing && (
-                  <div className="mt-8 text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-                    <p className="mt-2 text-blue-600 font-medium">Processing...</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </main>
+        {image && selectedFeature && (
+          <PropertiesPanel
+            selectedFeature={selectedFeature}
+            options={options}
+            onOptionsChange={setOptions}
+            image={image}
+          />
+        )}
       </div>
     </div>
   );
